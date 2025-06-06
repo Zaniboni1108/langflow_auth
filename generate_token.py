@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
@@ -8,13 +9,23 @@ from google_auth_oauthlib.flow import InstalledAppFlow
 # 1) Ajuste aqui as scopes que seu Langflow vai usar:
 SCOPES = [
     "https://www.googleapis.com/auth/drive",
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
 ]
 
 # 2) Aponte para o JSON de "Desktop App" que você baixou do Google Cloud
-CLIENT_SECRET_FILE = r"G:\Meu Drive\Estudos\Pós-Graduação\Unicesimar\client_secret_1017279641312-mvq7v2357k94mgckj5a56apqkaah3s5h.apps.googleusercontent.com.json"
+CLIENT_SECRET_FILE = r"caminho do client_secret"
 
 # Nome do token que vai ser gravado localmente
 TOKEN_PATH = "token.json"
+
+def get_user_email(access_token):
+    headers = {'Authorization': f'Bearer {access_token}'}
+    response = requests.get("https://openidconnect.googleapis.com/v1/userinfo", headers=headers)
+    if response.status_code == 200:
+        user_info = response.json()
+        return user_info.get("email")
+    return None
 
 def main():
     creds = None
@@ -27,31 +38,30 @@ def main():
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
         else:
-            # Cria o fluxo a partir do seu credentials.json (Desktop App)
             flow = InstalledAppFlow.from_client_secrets_file(CLIENT_SECRET_FILE, SCOPES)
-
-            # run_local_server vai:
-            #   1) abrir seu navegador padrão no Google de autenticação,
-            #   2) subir um mini-servidor em localhost:<porta aleatória>
-            #   3) receber o callback automático (http://localhost:<porta>/?code=…)
             creds = flow.run_local_server(port=0)
 
-        # Salva o novo token.json (contendo access_token e refresh_token)
         with open(TOKEN_PATH, "w", encoding="utf-8") as token_file:
             token_file.write(creds.to_json())
         print(f"\nToken salvo em '{TOKEN_PATH}'.\n")
     else:
-        print("Já existe um token válido em disk (token.json).")
+        print("Já existe um token válido em disco (token.json).")
 
-    # Remova se não quiser ver o JSON; aqui só mostramos no console para você conferir
     creds_json = json.loads(creds.to_json())
     creds_json["type"] = "authorized_user"
 
-    # Salvar o JSON com o campo "type"
+    # Pega o e-mail da conta e adiciona no campo 'account'
+    email = get_user_email(creds.token)
+    if email:
+        creds_json["account"] = email
+    else:
+        creds_json["account"] = ""
+
+    # Salvar o JSON com o campo "type" e "account"
     with open(TOKEN_PATH, "w", encoding="utf-8") as token_file:
         json.dump(creds_json, token_file, indent=2, ensure_ascii=False)
+    
     print(json.dumps(creds_json, indent=2, ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()
