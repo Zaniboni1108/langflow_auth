@@ -100,18 +100,11 @@ Este componente para Langflow carrega credenciais do Google a partir de um arqui
    python generate_token.py
    ```
 2. Copie token.json para o ambiente onde roda o Langflow.
-3. No Langflow, arraste e configure o componente Google OAuth Token (via token.json), apontando para:
+3. No Langflow, arraste e configure o New Custom Component com o código fornecido, apontando para:
    - Scopes desejadas.
    - credentials.json (Desktop App).
    - token.json gerado.
 4. Conecte a saída do componente para autenticar chamadas às APIs do Google.
-
----
-
-## Dependências Pip
-```bash
-pip install --upgrade google-auth google-auth-oauthlib
-```
 
 ---
 
