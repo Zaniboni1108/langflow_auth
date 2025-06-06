@@ -102,7 +102,10 @@ class GoogleOAuthToken(Component):
             # Se carregamos e o creds está válido agora, retornamos imediatamente
             if creds and creds.valid:
                 creds_json = json.loads(creds.to_json())
+                if "type" not in creds_json:
+                    creds_json["type"] = "authorized_user"
                 return Data(data=creds_json)
+
 
             # Caso contrário, cai em erro abaixo
 
