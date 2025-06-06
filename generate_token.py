@@ -11,7 +11,7 @@ SCOPES = [
 ]
 
 # 2) Aponte para o JSON de "Desktop App" que você baixou do Google Cloud
-CLIENT_SECRET_FILE = r"caminho para o client_secret"
+CLIENT_SECRET_FILE = r"G:\Meu Drive\Estudos\Pós-Graduação\Unicesimar\client_secret_1017279641312-mvq7v2357k94mgckj5a56apqkaah3s5h.apps.googleusercontent.com.json"
 
 # Nome do token que vai ser gravado localmente
 TOKEN_PATH = "token.json"
@@ -45,6 +45,11 @@ def main():
 
     # Remova se não quiser ver o JSON; aqui só mostramos no console para você conferir
     creds_json = json.loads(creds.to_json())
+    creds_json["type"] = "authorized_user"
+
+    # Salvar o JSON com o campo "type"
+    with open(TOKEN_PATH, "w", encoding="utf-8") as token_file:
+        json.dump(creds_json, token_file, indent=2, ensure_ascii=False)
     print(json.dumps(creds_json, indent=2, ensure_ascii=False))
 
 
